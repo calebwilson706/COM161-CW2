@@ -45,11 +45,19 @@ class TestStudent(TestCase):
                 "Not correct amount of attributes in string"
             )
 
-    def test_build_string(self):
-        result = valid_student.build_string()
+    def test_build_string_for_storage(self):
+        result = valid_student.build_string_for_storage()
 
         self.assertEqual(
             valid_string,
+            result
+        )
+
+    def test_build_string_for_display(self):
+        result = valid_student.build_string_for_display()
+
+        self.assertEqual(
+            "Bruce Wayne (B000). 25 years old from USA",
             result
         )
 

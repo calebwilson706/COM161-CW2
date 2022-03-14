@@ -18,7 +18,7 @@ def main():
         selected_option = options[menu.show()]
 
         if selected_option == option_output_all_details:
-            students_service.output_all_with_summary()
+            students_service.output_all_students_with_summary()
         elif selected_option == option_exit:
             break
 

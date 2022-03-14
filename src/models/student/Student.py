@@ -8,7 +8,7 @@ class Student:
         self.age = age
         self.country = country
 
-    def __eq__(self, other: "student") -> bool:
+    def __eq__(self, other: "Student") -> bool:
         return (
             self.student_id == other.student_id
             and self.surname == other.surname
@@ -18,7 +18,7 @@ class Student:
         )
 
     @classmethod
-    def build_from_string(cls, string: str) -> "student":
+    def build_from_string(cls, string: str) -> "Student":
         try:
             parts = string.strip().split(", ")
 
@@ -27,15 +27,13 @@ class Student:
 
             student_id, surname, forename, age, country = parts
 
-            return cls(
-                student_id,
-                surname,
-                forename,
-                int(age),
-                country
-            )
+            return cls(student_id, surname, forename, int(age), country)
+
         except Exception as e:
             raise e
 
-    def build_string(self):
+    def build_string_for_storage(self):
         return f'{self.student_id}, {self.surname}, {self.forename}, {self.age}, {self.country}'
+
+    def build_string_for_display(self):
+        return f'{self.forename} {self.surname} ({self.student_id}). {self.age} years old from {self.country}.'
