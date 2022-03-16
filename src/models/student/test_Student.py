@@ -1,5 +1,5 @@
 from unittest import TestCase
-
+from unittest.mock import patch, call
 from src.models.student.Student import Student
 
 valid_string = "B000, Wayne, Bruce, 25, USA"
@@ -30,20 +30,26 @@ class TestStudent(TestCase):
             result
         )
 
-    def test_build_from_string_throws_error_when_age_is_not_valid(self):
-        self.assert_raises_with_message(
-            ValueError,
-            lambda: Student.build_from_string(invalid_age_string),
-            "invalid literal for int() with base 10: 'a'"
-        )
+    @patch("src.models.student.Student.print_error")
+    def test_build_from_string_shows_error_when_age_is_not_valid(self, mock):
+        Student.build_from_string(invalid_age_string)
 
-    def test_build_from_string_throws_error_when_there_is_not_correct_attribute_count(self):
+        mock.assert_has_calls([
+            call("Student failed to be read with error:"),
+            call("  ", "invalid literal for int() with base 10: 'a'"),
+            call("   student text ->", invalid_age_string)
+        ])
+
+    @patch("src.models.student.Student.print_error")
+    def test_build_from_string_throws_error_when_there_is_not_correct_attribute_count(self, mock):
         for string in invalid_attribute_count_strings:
-            self.assert_raises_with_message(
-                ValueError,
-                lambda: Student.build_from_string(string),
-                "Not correct amount of attributes in string"
-            )
+            Student.build_from_string(string)
+
+            mock.assert_has_calls([
+                call("Student failed to be read with error:"),
+                call("  ", "Not correct amount of attributes in string"),
+                call("   student text ->", string)
+            ])
 
     def test_build_string_for_storage(self):
         result = valid_student.build_string_for_storage()
@@ -57,7 +63,7 @@ class TestStudent(TestCase):
         result = valid_student.build_string_for_display()
 
         self.assertEqual(
-            "Bruce Wayne (B000). 25 years old from USA",
+            "Bruce Wayne (B000). 25 years old from USA.",
             result
         )
 

@@ -1,25 +1,38 @@
 from simple_term_menu import TerminalMenu
 from src.services.StudentsService import StudentsService
 
-option_output_all_details = "Output the all students details and a summary"
-option_exit = "Exit the program"
+
+class Options:
+    output_all_details = "Output all students details and a summary"
+    output_youngest_and_oldest_details = "Output the details of the youngest and oldest student"
+    add_new_student = "Add a new student to the file"
+    exit = "Exit the program"
 
 
 def main():
     options = [
-        option_output_all_details,
-        option_exit
+        Options.output_all_details,
+        Options.output_youngest_and_oldest_details,
+        Options.add_new_student,
+        Options.exit
     ]
-    students_service = StudentsService("../data/students.txt")
+
+    students_service = StudentsService("data/students.txt")
 
     while True:
         menu = TerminalMenu(options)
 
         selected_option = options[menu.show()]
 
-        if selected_option == option_output_all_details:
+        print("You have selected:", selected_option, "\n")
+
+        if selected_option == Options.output_all_details:
             students_service.output_all_students_with_summary()
-        elif selected_option == option_exit:
+        elif selected_option == Options.output_youngest_and_oldest_details:
+            students_service.output_details_of_youngest_and_oldest_students()
+        elif selected_option == Options.add_new_student:
+            students_service.add_new_student()
+        elif selected_option == Options.exit:
             break
 
 

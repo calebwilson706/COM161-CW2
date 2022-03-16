@@ -1,3 +1,6 @@
+from src.utils.outputs.error.PrintError import print_error
+
+
 class Student:
     attribute_count = 5
 
@@ -19,8 +22,10 @@ class Student:
 
     @classmethod
     def build_from_string(cls, string: str) -> "Student":
+        stripped_string = string.strip()
+
         try:
-            parts = string.strip().split(", ")
+            parts = stripped_string.split(", ")
 
             if len(parts) != cls.attribute_count:
                 raise ValueError("Not correct amount of attributes in string")
@@ -29,11 +34,22 @@ class Student:
 
             return cls(student_id, surname, forename, int(age), country)
 
-        except Exception as e:
-            raise e
+        except Exception as error:
+            Student.display_error_for_failed_build_from_string(stripped_string, str(error))
+
+    @staticmethod
+    def display_error_for_failed_build_from_string(string, error):
+        print_error("Student failed to be read with error:")
+        print_error("  ", error)
+        print_error("   student text ->", string)
+        print()
 
     def build_string_for_storage(self):
         return f'{self.student_id}, {self.surname}, {self.forename}, {self.age}, {self.country}'
 
     def build_string_for_display(self):
         return f'{self.forename} {self.surname} ({self.student_id}). {self.age} years old from {self.country}.'
+
+    def display_details(self, title):
+        print(title)
+        print("-", self.build_string_for_display())
