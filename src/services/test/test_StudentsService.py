@@ -234,3 +234,25 @@ class TestStudentsService(TestCase):
             target.students,
             [caleb]
         )
+
+    @patch("builtins.input", return_value="B000")
+    @patch("src.services.StudentsService.print_success")
+    def test_search_by_id_happy(self, mock_print, mock_input):
+        target = StudentsService("data/mock.txt")
+
+        target.search_by_id()
+
+        mock_print.assert_called_with(
+            "-> ", "Caleb Wilson (B000). 19 years old from NI."
+        )
+
+    @patch("builtins.input", return_value="B111")
+    @patch("src.services.StudentsService.print_warn")
+    def test_search_by_id_fail(self, mock_print, mock_input):
+        target = StudentsService("data/mock.txt")
+
+        target.search_by_id()
+
+        mock_print.assert_called_with(
+            "The student with id: B111 was not found"
+        )

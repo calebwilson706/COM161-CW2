@@ -1,10 +1,14 @@
 from statistics import mean
+from typing import Optional
+
 from src.utils.files.CreateFileIfItDoesNotExist import create_file_if_it_does_not_exist
 from src.utils.inputs.GetInputThatMatchesPredicate import get_input_that_matches_predicate
 from src.utils.outputs.success.PrintSuccess import print_success
 from src.utils.outputs.warn.PrintWarn import print_warn
 from src.models.student.Student import Student
 from collections import defaultdict
+
+from src.utils.validation.IsValidStudentNumber import is_valid_student_number
 
 
 class StudentsService:
@@ -88,11 +92,7 @@ class StudentsService:
 
     @staticmethod
     def input_new_students_details() -> Student:
-        student_number = get_input_that_matches_predicate(
-            "Enter the students number: ",
-            lambda x: x[0] == "B" and len(x) == 4,
-            "Whoops! The student number must start with 'B' and be 4 characters long, please try again..."
-        )
+        student_id = StudentsService.input_student_id()
         first_names = input("Enter the first name(s) of the student: ")
         surname = input("Enter the surname of the student: ")
         age = int(get_input_that_matches_predicate(
@@ -102,7 +102,15 @@ class StudentsService:
         ))
         country = input("Please enter the country of origin of the student: ")
 
-        return Student(student_number, surname, first_names, age, country)
+        return Student(student_id, surname, first_names, age, country)
+
+    @staticmethod
+    def input_student_id() -> str:
+        return get_input_that_matches_predicate(
+            "Enter the students number: ",
+            is_valid_student_number,
+            "Whoops! The student number must start with 'B' and be 4 characters long, please try again..."
+        )
 
     def append_student_to_file(self, student):
         students_file = open(self.students_file_path, "a")
@@ -132,4 +140,25 @@ class StudentsService:
                 lambda s: s.age,
                 self.students
             )
+        )
+
+    def search_by_id(self):
+        student_id = StudentsService.input_student_id()
+
+        student = self.get_student_with_id(
+            student_id
+        )
+
+        if unwrapped_student := student:
+            print_success("Found student")
+            print_success("-> ", unwrapped_student.build_string_for_display())
+        else:
+            print_warn(f'The student with id: {student_id} was not found')
+
+        print()
+
+    def get_student_with_id(self, student_id) -> Optional[Student]:
+        return next(
+            (s for s in self.students if s.student_id == student_id),
+            None
         )

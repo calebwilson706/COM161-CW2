@@ -6,6 +6,7 @@ class Options:
     output_all_details = "Output all students details and a summary"
     output_youngest_and_oldest_details = "Output the details of the youngest and oldest student"
     add_new_student = "Add a new student to the file"
+    search_for_student_by_id = "Search for a student by their student number"
     exit = "Exit the program"
 
 
@@ -14,6 +15,7 @@ def main():
         Options.output_all_details,
         Options.output_youngest_and_oldest_details,
         Options.add_new_student,
+        Options.search_for_student_by_id,
         Options.exit
     ]
 
@@ -32,6 +34,8 @@ def main():
             students_service.output_details_of_youngest_and_oldest_students()
         elif selected_option == Options.add_new_student:
             students_service.add_new_student()
+        elif selected_option == Options.search_for_student_by_id:
+            students_service.search_by_id()
         elif selected_option == Options.exit:
             break
 
