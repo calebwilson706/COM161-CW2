@@ -52,12 +52,15 @@ class TestStudentsService(TestCase):
 
         target.output_all_students_with_summary()
 
-        mock_scs.assert_called_with([caleb, bob, lewis])
-        mock_sl.assert_called_with([caleb, bob, lewis])
+        mock_scs.assert_called_once()
+        mock_sl.assert_called_once()
 
     @patch("builtins.print")
     def test_output_student_list(self, mock):
-        StudentsService.output_student_list([caleb, bob])
+        target = StudentsService("data/mock.txt")
+        target.students = [caleb, bob]
+
+        target.output_student_list()
 
         mock.assert_has_calls([
             call('-', 'Caleb Wilson (B000). 19 years old from NI.'),
@@ -66,7 +69,9 @@ class TestStudentsService(TestCase):
 
     @patch("builtins.print")
     def test_output_student_count_summary(self, mock):
-        StudentsService.output_student_count_summary([caleb, bob, lewis])
+        target = StudentsService("data/mock.txt")
+
+        target.output_student_count_summary()
 
         mock.assert_has_calls([
             call("The total amount of student(s) is", 3),
@@ -75,7 +80,9 @@ class TestStudentsService(TestCase):
         ])
 
     def test_group_students_by_country(self):
-        result = StudentsService.group_students_by_country([caleb, bob, lewis])
+        target = StudentsService("data/mock.txt")
+
+        result = target.students_grouped_by_country()
 
         self.assertEqual(
             {"NI": [caleb], "England": [bob, lewis]},
@@ -107,7 +114,9 @@ class TestStudentsService(TestCase):
         ])
 
     def test_get_youngest_student(self):
-        result = StudentsService.get_youngest_student([caleb, bob, lewis])
+        target = StudentsService("data/mock.txt")
+
+        result = target.get_youngest_student()
 
         self.assertEqual(
             result,
@@ -115,7 +124,9 @@ class TestStudentsService(TestCase):
         )
 
     def test_get_oldest_student(self):
-        result = StudentsService.get_oldest_student([caleb, bob, lewis])
+        target = StudentsService("data/mock.txt")
+
+        result = target.get_oldest_student()
 
         self.assertEqual(
             result,
@@ -131,7 +142,7 @@ class TestStudentsService(TestCase):
         fake_file.write.assert_called_with(
             "B001, McBobberson, Bob, 19, England\n"
         )
-        fake_file.close.assert_called_once()
+        fake_file.close.assert_called()
 
     @patch("builtins.input", side_effect=[
         "B000",
@@ -208,4 +219,18 @@ class TestStudentsService(TestCase):
         self.assertEqual(
             result,
             76/3
+        )
+
+    @patch("src.services.StudentsService.StudentsService.input_new_students_details", return_value=caleb)
+    @patch("src.services.StudentsService.StudentsService.append_student_to_file")
+    @patch("builtins.open", return_value=fake_file)
+    def test_add_new_student(self, mock_open, mock_append_to_file, mock_new_details_getter):
+        target = StudentsService("data/mock.txt")
+
+        target.add_new_student()
+
+        mock_append_to_file.assert_called_once_with(caleb)
+        self.assertEqual(
+            target.students,
+            [caleb]
         )

@@ -13,11 +13,11 @@ class StudentsService:
 
         create_file_if_it_does_not_exist(students_file_path)
 
-    def output_all_students_with_summary(self):
-        students = self.get_students_from_file()
+        self.students = self.get_students_from_file()
 
-        StudentsService.output_student_list(students)
-        StudentsService.output_student_count_summary(students)
+    def output_all_students_with_summary(self):
+        self.output_student_list()
+        self.output_student_count_summary()
 
         print()
 
@@ -32,26 +32,23 @@ class StudentsService:
 
         return result
 
-    @staticmethod
-    def output_student_list(students):
+    def output_student_list(self):
         print("All Students:")
 
-        for student in students:
+        for student in self.students:
             print("-", student.build_string_for_display())
 
-    @staticmethod
-    def output_student_count_summary(students):
+    def output_student_count_summary(self):
         print("\nSummary:")
-        print("The total amount of student(s) is", len(students))
+        print("The total amount of student(s) is", len(self.students))
 
-        for country, students_in_country in StudentsService.group_students_by_country(students).items():
+        for country, students_in_country in self.students_grouped_by_country().items():
             print("-", len(students_in_country), "from", country)
 
-    @staticmethod
-    def group_students_by_country(students):
+    def students_grouped_by_country(self):
         result = defaultdict(list)
 
-        for student in students:
+        for student in self.students:
             result[student.country].append(student)
 
         return result
@@ -63,21 +60,19 @@ class StudentsService:
             print_warn("Whoops! There are no students in the file.\n")
             return
 
-        youngest = StudentsService.get_youngest_student(students)
-        oldest = StudentsService.get_oldest_student(students)
+        youngest = self.get_youngest_student()
+        oldest = self.get_oldest_student()
 
         youngest.display_details("The youngest student:")
         oldest.display_details("The oldest student:")
 
         print()
 
-    @staticmethod
-    def get_youngest_student(students) -> Student:
-        return min(students, key=lambda student: student.age)
+    def get_youngest_student(self) -> Student:
+        return min(self.students, key=lambda student: student.age)
 
-    @staticmethod
-    def get_oldest_student(students) -> Student:
-        return max(students, key=lambda student: student.age)
+    def get_oldest_student(self) -> Student:
+        return max(self.students, key=lambda student: student.age)
 
     def add_new_student(self):
         new_student = StudentsService.input_new_students_details()
@@ -85,6 +80,7 @@ class StudentsService:
         self.append_student_to_file(
             new_student
         )
+        self.students.append(new_student)
 
         print_success("The student has been added!")
         print_success(f'-> there is now {self.count_students_in_file()} students in the file.')
@@ -116,9 +112,7 @@ class StudentsService:
         students_file.close()
 
     def count_students_in_file(self):
-        return len(
-            self.get_students_from_file()
-        )
+        return len(self.students)
 
     def get_difference_between_age_and_average(self, student):
         average = self.get_average_age_of_students_in_file()
@@ -136,6 +130,6 @@ class StudentsService:
         return mean(
             map(
                 lambda s: s.age,
-                self.get_students_from_file()
+                self.students
             )
         )
