@@ -1,15 +1,12 @@
+from collections import defaultdict
 from statistics import mean
 from typing import Optional
-
+from matplotlib import pyplot as plt
+from src.models.student.Student import Student
+from src.services.StudentsInputService import StudentsInputService
 from src.utils.files.CreateFileIfItDoesNotExist import create_file_if_it_does_not_exist
-from src.utils.inputs.GetInputThatMatchesPredicate import get_input_that_matches_predicate
-from src.utils.inputs.GetNonEmptyInput import get_non_empty_input
 from src.utils.outputs.success.PrintSuccess import print_success
 from src.utils.outputs.warn.PrintWarn import print_warn
-from src.models.student.Student import Student
-from collections import defaultdict
-
-from src.utils.validation.IsValidStudentNumber import is_valid_student_number
 
 
 class StudentsService:
@@ -21,7 +18,7 @@ class StudentsService:
         self.students = self.get_students_from_file()
 
     def output_all_students_with_summary(self):
-        self.output_student_list()
+        self.output_all_students()
         self.output_student_count_summary()
 
         print()
@@ -37,10 +34,15 @@ class StudentsService:
 
         return result
 
-    def output_student_list(self):
+    def output_all_students(self):
         print("All Students:")
+        StudentsService.display_students_in_list(
+            self.students
+        )
 
-        for student in self.students:
+    @staticmethod
+    def display_students_in_list(students):
+        for student in students:
             print("-", student.build_string_for_display())
 
     def output_student_count_summary(self):
@@ -80,7 +82,7 @@ class StudentsService:
         return max(self.students, key=lambda student: student.age)
 
     def add_new_student(self):
-        new_student = StudentsService.input_new_students_details()
+        new_student = StudentsInputService.input_new_students_details()
 
         self.append_student_to_file(
             new_student
@@ -90,28 +92,6 @@ class StudentsService:
         print_success("The student has been added!")
         print_success(f'-> there is now {self.count_students_in_file()} students in the file.')
         print_success(f'-> the student\'s age is {new_student.age} which is {self.get_difference_between_age_and_average(new_student)} the average age.')
-
-    @staticmethod
-    def input_new_students_details() -> Student:
-        student_id = StudentsService.input_student_id()
-        first_names = get_non_empty_input("Enter the first name(s) of the student: ")
-        surname = get_non_empty_input("Enter the surname of the student: ")
-        age = int(get_input_that_matches_predicate(
-            "Enter the age of the student: ",
-            lambda x: x.isdigit(),
-            "Whoops! that doesn't look like a valid age"
-        ))
-        country = get_non_empty_input("Please enter the country of origin of the student: ")
-
-        return Student(student_id, surname, first_names, age, country)
-
-    @staticmethod
-    def input_student_id() -> str:
-        return get_input_that_matches_predicate(
-            "Enter the students number: ",
-            is_valid_student_number,
-            "Whoops! The student number must start with 'B' and be 4 characters long, please try again..."
-        )
 
     def append_student_to_file(self, student):
         students_file = open(self.students_file_path, "a")
@@ -144,7 +124,7 @@ class StudentsService:
         )
 
     def search_by_id(self):
-        student_id = StudentsService.input_student_id()
+        student_id = StudentsInputService.input_student_id()
 
         student = self.get_student_with_id(
             student_id
@@ -163,3 +143,23 @@ class StudentsService:
             (s for s in self.students if s.student_id == student_id),
             None
         )
+
+    def output_sorted_students(self, field):
+        print(f'Students sorted by {field}:')
+        StudentsService.display_students_in_list(
+            sorted(self.students, key=lambda s: getattr(s, field))
+        )
+        print()
+
+    def show_countries_bar_chart(self):
+        grouped_by_countries = self.students_grouped_by_country()
+
+        countries = list(grouped_by_countries.keys())
+        students = list(map(lambda x: len(x), grouped_by_countries.values()))
+
+        plt.bar(
+            countries,
+            students
+        )
+
+        plt.show()

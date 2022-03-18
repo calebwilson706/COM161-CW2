@@ -20,6 +20,8 @@ class Student:
             and self.country == other.country
         )
 
+
+
     @classmethod
     def build_from_string(cls, string: str) -> "Student":
         stripped_string = string.strip()

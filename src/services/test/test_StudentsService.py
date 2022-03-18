@@ -45,7 +45,7 @@ class TestStudentsService(TestCase):
         ])
 
     @patch("builtins.input")
-    @patch("src.services.StudentsService.StudentsService.output_student_list")
+    @patch("src.services.StudentsService.StudentsService.output_all_students")
     @patch("src.services.StudentsService.StudentsService.output_student_count_summary")
     def test_output_all_students_with_summary(self, mock_scs, mock_sl, _):
         target = StudentsService("data/mock.txt")
@@ -60,7 +60,7 @@ class TestStudentsService(TestCase):
         target = StudentsService("data/mock.txt")
         target.students = [caleb, bob]
 
-        target.output_student_list()
+        target.output_all_students()
 
         mock.assert_has_calls([
             call('-', 'Caleb Wilson (B000). 19 years old from NI.'),
@@ -144,21 +144,6 @@ class TestStudentsService(TestCase):
         )
         fake_file.close.assert_called()
 
-    @patch("builtins.input", side_effect=[
-        "B000",
-        "Caleb",
-        "Wilson",
-        "19",
-        "NI"
-    ])
-    def test_input_new_students_details(self, mock_input):
-        result = StudentsService.input_new_students_details()
-
-        self.assertEqual(
-            caleb,
-            result
-        )
-
     def test_count_students_in_file(self):
         target = StudentsService("data/mock.txt")
 
@@ -221,7 +206,7 @@ class TestStudentsService(TestCase):
             76/3
         )
 
-    @patch("src.services.StudentsService.StudentsService.input_new_students_details", return_value=caleb)
+    @patch("src.services.StudentsInputService.StudentsInputService.input_new_students_details", return_value=caleb)
     @patch("src.services.StudentsService.StudentsService.append_student_to_file")
     @patch("builtins.open", return_value=fake_file)
     def test_add_new_student(self, mock_open, mock_append_to_file, mock_new_details_getter):
@@ -256,3 +241,19 @@ class TestStudentsService(TestCase):
         mock_print.assert_called_with(
             "The student with id: B111 was not found"
         )
+
+    @patch("builtins.print")
+    def test_output_sorted_students(self, mock_print):
+        target = StudentsService("data/mock.txt")
+
+        target.output_sorted_students("surname")
+
+        mock_print.assert_has_calls([
+            call('Students sorted by surname:'),
+            call('-', 'Lewis Hamilton (B002). 38 years old from England.'),
+            call('-', 'Bob McBobberson (B001). 19 years old from England.'),
+            call('-', 'Caleb Wilson (B000). 19 years old from NI.'),
+            call()
+        ])
+
+
