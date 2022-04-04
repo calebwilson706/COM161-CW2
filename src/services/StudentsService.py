@@ -7,15 +7,19 @@ from src.services.StudentsInputService import StudentsInputService
 from src.utils.files.CreateFileIfItDoesNotExist import create_file_if_it_does_not_exist
 from src.utils.outputs.success.PrintSuccess import print_success
 from src.utils.outputs.warn.PrintWarn import print_warn
+# noinspection PyBroadException
 
 
 class StudentsService:
     def __init__(self, students_file_path):
-        self.students_file_path = students_file_path
+        try:
+            self.students_file_path = students_file_path
 
-        create_file_if_it_does_not_exist(students_file_path)
+            create_file_if_it_does_not_exist(students_file_path)
 
-        self.students = self.get_students_from_file()
+            self.students = self.get_students_from_file()
+        except Exception as e:
+            raise e
 
     def output_all_students_with_summary(self):
         self.output_all_students()
@@ -24,15 +28,18 @@ class StudentsService:
         print()
 
     def get_students_from_file(self):
-        students_file = open(self.students_file_path, "r")
-        result = []
+        try:
+            students_file = open(self.students_file_path, "r")
+            result = []
 
-        for line in students_file:
-            if student := Student.build_from_string(line): result.append(student)
+            for line in students_file:
+                if student := Student.build_from_string(line): result.append(student)
 
-        students_file.close()
+            students_file.close()
 
-        return result
+            return result
+        except Exception as e:
+            raise e
 
     def output_all_students(self):
         print("All Students:")
@@ -61,9 +68,7 @@ class StudentsService:
         return result
 
     def output_details_of_youngest_and_oldest_students(self):
-        students = self.get_students_from_file()
-
-        if len(students) == 0:
+        if len(self.students) == 0:
             print_warn("Whoops! There are no students in the file.\n")
             return
 
@@ -82,23 +87,29 @@ class StudentsService:
         return max(self.students, key=lambda student: student.age)
 
     def add_new_student(self):
-        new_student = StudentsInputService.input_new_students_details()
+        try:
+            new_student = StudentsInputService.input_new_students_details()
 
-        self.append_student_to_file(
-            new_student
-        )
-        self.students.append(new_student)
+            self.append_student_to_file(
+                new_student
+            )
+            self.students.append(new_student)
 
-        print_success("The student has been added!")
-        print_success(f'-> there is now {self.count_students_in_file()} students in the file.')
-        print_success(f'-> the student\'s age is {new_student.age} which is {self.get_difference_between_age_and_average(new_student)} the average age.')
+            print_success("The student has been added!")
+            print_success(f'-> there is now {self.count_students_in_file()} students in the file.')
+            print_success(f'-> the student\'s age is {new_student.age} which is {self.get_difference_between_age_and_average(new_student)} the average age.')
+        except Exception as e:
+            raise e
 
     def append_student_to_file(self, student):
-        students_file = open(self.students_file_path, "a")
+        try:
+            students_file = open(self.students_file_path, "a")
 
-        students_file.write(student.build_string_for_storage() + "\n")
+            students_file.write(student.build_string_for_storage() + "\n")
 
-        students_file.close()
+            students_file.close()
+        except Exception as e:
+            raise e
 
     def count_students_in_file(self):
         return len(self.students)

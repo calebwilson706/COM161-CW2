@@ -1,5 +1,7 @@
 from src.services.StudentsService import StudentsService
 from src.utils.inputs.SelectOptionFromList import select_option_from_list
+from src.utils.outputs.error.PrintError import print_error
+# noinspection PyBroadException
 
 
 class Options:
@@ -23,7 +25,11 @@ def main():
         Options.exit
     ]
 
-    students_service = StudentsService("data/students.txt")
+    try:
+        students_service = StudentsService("../data/students.txt")
+    except:
+        print_error("Something went wrong initialising the program, please try again.")
+        return
 
     while True:
         selected_option = select_option_from_list(
@@ -33,24 +39,27 @@ def main():
 
         print("You have selected:", selected_option, "\n")
 
-        if selected_option == Options.output_all_details:
-            students_service.output_all_students_with_summary()
-        elif selected_option == Options.output_youngest_and_oldest_details:
-            students_service.output_details_of_youngest_and_oldest_students()
-        elif selected_option == Options.add_new_student:
-            students_service.add_new_student()
-        elif selected_option == Options.search_for_student_by_id:
-            students_service.search_by_id()
-        elif selected_option == Options.output_sorted_students:
-            selected_field = select_option_from_list(
-                ["age", "surname"],
-                "Select what you would like to sort by:"
-            )
-            students_service.output_sorted_students(selected_field)
-        elif selected_option == Options.show_bar_chart:
-            students_service.show_countries_bar_chart()
-        elif selected_option == Options.exit:
-            break
+        try:
+            if selected_option == Options.output_all_details:
+                students_service.output_all_students_with_summary()
+            elif selected_option == Options.output_youngest_and_oldest_details:
+                students_service.output_details_of_youngest_and_oldest_students()
+            elif selected_option == Options.add_new_student:
+                students_service.add_new_student()
+            elif selected_option == Options.search_for_student_by_id:
+                students_service.search_by_id()
+            elif selected_option == Options.output_sorted_students:
+                selected_field = select_option_from_list(
+                    ["age", "surname"],
+                    "Select what you would like to sort by:"
+                )
+                students_service.output_sorted_students(selected_field)
+            elif selected_option == Options.show_bar_chart:
+                students_service.show_countries_bar_chart()
+            elif selected_option == Options.exit:
+                break
+        except:
+            print_error("Something went wrong, try again or select another option...")
 
 
 main()
